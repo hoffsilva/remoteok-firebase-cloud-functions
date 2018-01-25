@@ -264,3 +264,22 @@ exports.getStatistics = functions.https.onRequest(function (req, res) {
             }
         });
 });
+
+
+exports.getUsersXml = functions.https.onRequest(function (req, res) {
+
+    var xml = '' +
+        '<?xml version="1.0" ?>' +
+        '<usuarios>' +
+        '<usuario>' +
+        '<username>admim</username>' +
+        '<password>admim</password>' +
+        '</usuario>'+
+        '<usuario>' +
+        '<username>admim</username>' +
+        '<password>123456</password>' +
+        '</usuario>'+
+        '</usuarios>';
+
+    return response(res, xml, 200)
+});
