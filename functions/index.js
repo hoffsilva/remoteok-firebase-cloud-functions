@@ -272,14 +272,16 @@ exports.getUsersXml = functions.https.onRequest(function (req, res) {
         '<?xml version="1.0" ?>' +
         '<usuarios>' +
         '<usuario>' +
-        '<username>admim</username>' +
-        '<password>admim</password>' +
+        '<username>admin</username>' +
+        '<password>admin</password>' +
         '</usuario>'+
         '<usuario>' +
-        '<username>admim</username>' +
+        '<username>admin</username>' +
         '<password>123456</password>' +
         '</usuario>'+
         '</usuarios>';
 
-    return response(res, xml, 200)
+    res.set('Content-Type', 'text/xml');
+
+    return res.send(xml);
 });
