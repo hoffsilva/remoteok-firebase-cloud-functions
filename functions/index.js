@@ -69,6 +69,13 @@ function isCacheValid(snapshot) {
     )
 }
 
+function isCacheCompaniesValid(snapshot) {
+    return (
+        snapshot.exists() &&
+        elapsed(snapshot.val().date) < ONE_HOUR * 72
+    )
+}
+
 function elapsed(date) {
     var then = new Date(date);
     var now = new Date(Date.now());
@@ -165,7 +172,7 @@ exports.getCompanies = functions.https.onRequest(function (req, res) {
     return lastEdition
         .once('value')
         .then(function (snapshot) {
-            if (isCacheValid(snapshot)) {
+            if (isCacheCompaniesValid(snapshot)) {
                 return response(res, snapshot.val(), 200)
             } else {
 
@@ -201,11 +208,70 @@ exports.getCompanies = functions.https.onRequest(function (req, res) {
                             }
                         });
 
-                        console.log('companies', companies);
                         save(lastEdition, companies);
 
                         responseData.date = new Date(Date.now()).toISOString();
                         responseData.items = companies;
+
+                        return response(res, responseData, 200)
+
+                    } else {
+                        return response(res, responseData, 200)
+                    }
+                });
+            }
+        });
+});
+
+exports.getCompanyJobs = functions.https.onRequest(function (req, res) {
+
+    var  path = req.query.company.replace(" ", "-");
+
+    var url = 'https://remoteok.io/remote-companies/' + path.toLowerCase();
+
+    const lastEdition = admin.database().ref('/remoteok/companies/jobs');
+    return lastEdition
+        .once('value')
+        .then(function (snapshot) {
+            if (isCacheCompaniesValid(snapshot)) {
+                return response(res, snapshot.val(), 200)
+            } else {
+
+                request(url, function (error, resp, html) {
+                    if (!error) {
+
+                        var jobs = [];
+                        var $ = cheerio.load(html);
+                        $('.job').each(function (i, elem) {
+
+                            if (i < 30) {
+
+                                var job = {};
+
+                                job.id = $(this).attr('data-id');
+                                job.epoch = $(this).children().eq(5).text();
+                                job.date = $(this).children().eq(5).text();
+                                job.position = $(this).children().eq(1).children().eq(0).text();
+                                job.logo = $(this).children().eq(0).find('div').attr('src');
+                                job.description = $(this).children().eq(1).children().eq(0).text();
+                                job.company = req.query.company;
+                                job.url = "https://remoteok.io/jobs/" + job.id;
+
+                                job.tags = [];
+                                $(this).children().eq(3).each(function () {
+                                    $(this).children().each(function () {
+                                        job.tags.push($(this).text())
+                                    });
+                                });
+
+                                jobs.push(job);
+                            }
+                        });
+
+                        save(lastEdition, jobs);
+
+                        responseData.date = new Date(Date.now()).toISOString();
+                        responseData.items = jobs;
 
                         return response(res, responseData, 200)
 
@@ -274,11 +340,11 @@ exports.getUsersXml = functions.https.onRequest(function (req, res) {
         '<usuario>' +
         '<username>admin</username>' +
         '<password>admin</password>' +
-        '</usuario>'+
+        '</usuario>' +
         '<usuario>' +
         '<username>admin</username>' +
         '<password>123456</password>' +
-        '</usuario>'+
+        '</usuario>' +
         '</usuarios>';
 
     res.set('Content-Type', 'text/xml');
