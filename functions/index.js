@@ -140,7 +140,7 @@ function response(res, items, code) {
 function isCacheValid(snapshot) {
     return (
         snapshot.exists() &&
-        elapsed(snapshot.val().date) < ONE_HOUR * 4
+        elapsed(snapshot.val().date) < ONE_HOUR * 6
     )
 }
 
@@ -200,7 +200,7 @@ exports.highestPaid = functions.https.onRequest(function (req, res) {
     return lastEdition
         .once('value')
         .then(function (snapshot) {
-            if (isCacheValid(snapshot)) {
+            if (isCacheCompaniesValid(snapshot)) {
                 return response(res, snapshot.val(), 200)
             } else {
 
@@ -366,7 +366,7 @@ exports.getStatistics = functions.https.onRequest(function (req, res) {
     return lastEdition
         .once('value')
         .then(function (snapshot) {
-            if (isCacheValid(snapshot)) {
+            if (isCacheCompaniesValid(snapshot)) {
                 return response(res, snapshot.val(), 200)
             } else {
 
