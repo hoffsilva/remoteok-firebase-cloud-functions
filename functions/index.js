@@ -304,7 +304,7 @@ exports.getCompanyJobs = functions.https.onRequest(function (req, res) {
 
     var url = 'https://remoteok.io/remote-companies/' + path.toLowerCase();
 
-    const lastEdition = admin.database().ref('/remoteok/companies/jobs');
+    const lastEdition = admin.database().ref('/remoteok/companies/jobs/' + path.toLowerCase());
     return lastEdition
         .once('value')
         .then(function (snapshot) {
