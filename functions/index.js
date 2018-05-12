@@ -86,9 +86,10 @@ exports.getJobs = functions.https.onRequest(function (req, res) {
                                     if (j <= i) {
                                         if ($(this).attr('data-id') === job.id) {
                                             job.description = $(this).children().eq(0).children().eq(0).children().eq(0).html();
-                                            if (job.description.length > 0) {
+                                            console.log("description", job.description);
+                                            /*if (job.description.length > 0) {
                                                 job.description = job.description.substr(0, job.description.indexOf("<div class=\"share no-tweet\">"));
-                                            }
+                                            }*/
                                         }
                                     }
                                 });
